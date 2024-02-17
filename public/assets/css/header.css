@@ -1,0 +1,46 @@
+header {
+    background-color: var(--header-bg-color);
+    color: var(--text-color);
+    padding: var(--padding-unit);
+}
+
+/* Navigation (nav) Styling */
+nav {
+    background-color: var(--primary-bg-color);
+    color: var(--link-text-color);
+    padding: var(--padding-unit);
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    display: inline-block;
+    margin-right: var(--padding-unit);
+    padding-right: var(--padding-unit);
+    position: relative;
+}
+
+nav ul li:last-child {
+    margin-right: 0;
+}
+
+nav ul li::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--link-text-color);
+    transition: width 0.3s ease;
+}
+
+nav ul li:hover::after {
+    width: 100%;
+}
