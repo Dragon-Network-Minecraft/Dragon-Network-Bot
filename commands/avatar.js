@@ -14,6 +14,14 @@ module.exports = {
     const targetUser = interaction.options.getUser('target') || interaction.user;
     const avatarURL = targetUser.displayAvatarURL({ dynamic: true, size: 256 });
 
-    await interaction.reply(`Avatar of ${targetUser.tag}:\n${avatarURL}`);
+    const embed = {
+      title: `Avatar of ${targetUser.tag}`,
+      image: {
+        url: avatarURL,
+      },
+      color: 0x3498db, // You can customize the color as needed
+    };
+
+    await interaction.reply({ embeds: [embed] });
   },
 };
