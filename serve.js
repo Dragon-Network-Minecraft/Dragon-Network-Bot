@@ -43,10 +43,10 @@ app.get('/example', (req, res) => {
 
 // 404 Error handling for unknown routes
 app.use((req, res, next) => {
-  logger.warn(`404 - Not Found: ${req.url}`);
-  res.status(404).send('Not Found');
-});
-
+    logger.warn(`404 - Not Found: ${req.url}`);
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+  });
+  
 // Global error handler
 app.use((error, req, res, next) => {
   logger.error(`Unhandled Error: ${error.message}`);
