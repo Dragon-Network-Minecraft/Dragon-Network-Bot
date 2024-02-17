@@ -19,7 +19,7 @@ module.exports = {
       image: {
         url: avatarURL,
       },
-      color: 0x3498db, // You can customize the color as needed
+      color: 0x3498db,
     };
 
     await interaction.reply({ embeds: [embed] });
