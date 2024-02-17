@@ -54,7 +54,7 @@ const processLogQueue = async () => {
   // Send logs to Discord webhook
   try {
     const embeds = logs.map(({ level, message }) => ({
-      title: `${level.name} Log Messages`,
+      title: `${level.name}`,
       description: '```\n' + message + '\n```',
       color: level.color,
     }));
