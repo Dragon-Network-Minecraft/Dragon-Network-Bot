@@ -48,16 +48,37 @@ const processLogQueue = async () => {
     return;
   }
 
-  const logs = logQueue.slice();
+  const groupedLogs = [];
+  let currentLogGroup = [];
+
+  // Group consecutive logs of the same level
+  for (const log of logQueue) {
+    if (currentLogGroup.length === 0 || currentLogGroup[0].level === log.level) {
+      currentLogGroup.push(log);
+    } else {
+      groupedLogs.push(currentLogGroup);
+      currentLogGroup = [log];
+    }
+  }
+
+  if (currentLogGroup.length > 0) {
+    groupedLogs.push(currentLogGroup);
+  }
+
   logQueue.length = 0;
 
-  // Send logs to Discord webhook
+  // Send grouped logs to Discord webhook
   try {
-    const embeds = logs.map(({ level, message }) => ({
-      title: `${level.name}`,
-      description: '```\n' + message + '\n```',
-      color: level.color,
-    }));
+    const embeds = groupedLogs.map(logGroup => {
+      const { level, message } = logGroup[0];
+      const groupedMessage = logGroup.map(log => log.message).join('\n');
+
+      return {
+        title: `${level.name} (x${logGroup.length})`,
+        description: '```\n' + groupedMessage + '\n```',
+        color: level.color,
+      };
+    });
 
     await webhookClient.send({ embeds });
   } catch (error) {
