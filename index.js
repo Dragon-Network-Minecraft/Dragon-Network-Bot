@@ -3,6 +3,7 @@ const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
 require('dotenv').config();
+const logger = require('./logger');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -20,16 +21,16 @@ const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
 
 (async () => {
   try {
-    console.log('Started refreshing global (/) commands.');
+    logger.log('Started refreshing global (/) commands.');
 
     await rest.put(
       Routes.applicationCommands(process.env.CLIENT_ID),
       { body: commands },
     );
 
-    console.log('Successfully reloaded global (/) commands.');
+    logger.log('Successfully reloaded global (/) commands.');
   } catch (error) {
-    console.error(error);
+    logger.error(`Error refreshing global (/) commands: ${error}`);
   }
 })();
 
@@ -41,7 +42,7 @@ for (const file of commandFiles) {
 }
 
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}`);
+  logger.log(`Logged in as ${client.user.tag}`);
 });
 
 client.on('interactionCreate', async interaction => {
@@ -52,9 +53,13 @@ client.on('interactionCreate', async interaction => {
   if (!command) return;
 
   try {
+    logger.log(`Interaction received: ${interaction.commandName} from ${interaction.user.tag} in ${interaction.guild.name}`);
+    
     await command.execute(interaction);
+    
+    logger.log(`Command executed: ${interaction.commandName} by ${interaction.user.tag} in ${interaction.guild.name}`);
   } catch (error) {
-    console.error(error);
+    logger.error(`Error executing command '${interaction.commandName}' for ${interaction.user.tag} in ${interaction.guild.name}: ${error}`);
     await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
   }
 });
