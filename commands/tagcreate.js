@@ -34,7 +34,19 @@ module.exports = {
 
       logger.log(`Tag created: ${tagName} by ${interaction.user.tag}`);
 
-      await interaction.reply(`Tag created successfully: ${tagName}`);
+      // Construct a direct object for the reply
+      const replyObject = {
+        content: `Tag created successfully: ${tagName}`,
+        embeds: [{
+          title: 'Tag Details',
+          fields: [
+            { name: 'Tag Name', value: tagName, inline: false },
+            { name: 'Tag Content', value: tagContent, inline: false },
+          ],
+        }],
+      };
+
+      await interaction.reply(replyObject);
     } catch (error) {
       logger.error(`Error creating tag for ${interaction.user.tag}: ${error}`);
       await interaction.reply({ content: 'There was an error while creating the tag!', ephemeral: true });
