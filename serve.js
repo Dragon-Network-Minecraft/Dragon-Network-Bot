@@ -10,7 +10,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.WEBSITE_PORT || 3000;
 
-// Serve the contents of the 'public' folder
+// Serve the contents of the 'public' folder without specifying .html
+app.use((req, res, next) => {
+  if (req.url.endsWith('/') || !path.extname(req.url)) {
+    req.url += '.html';
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Error handling for server setup
