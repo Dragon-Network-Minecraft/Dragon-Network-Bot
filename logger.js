@@ -48,8 +48,8 @@ const processLogQueue = async () => {
     return;
   }
 
-  const logs = logQueue.slice(); // Copy the log queue
-  logQueue.length = 0; // Clear the log queue
+  const logs = logQueue.slice();
+  logQueue.length = 0;
 
   // Send logs to Discord webhook
   try {
