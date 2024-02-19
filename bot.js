@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 const logger = require('./utilities/logger');
 
@@ -45,22 +46,39 @@ client.on('ready', () => {
   logger.log(`Logged in as ${client.user.tag}`);
 });
 
-client.on('interactionCreate', async interaction => {
-  if (!interaction.isCommand()) return;
-
-  const command = client.commands.get(interaction.commandName);
-
-  if (!command) return;
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand() && !interaction.isSelectMenu()) return;
 
   try {
-    logger.log(`Interaction received: ${interaction.commandName} from ${interaction.user.tag} in ${interaction.guild.name}`);
-    
-    await command.execute(interaction);
-    
-    logger.log(`Command executed: ${interaction.commandName} by ${interaction.user.tag} in ${interaction.guild.name}`);
+    if (interaction.isSelectMenu()) {
+      // Handle select menu interactions
+      const customId = interaction.customId;
+
+      if (customId === 'tagSelection') {
+        // Handle the tag selection
+        const selectedTag = interaction.values[0]; // Assuming it's a single-selection dropdown
+
+        // Read the content of the selected tag
+        const tagPath = path.join(__dirname, 'data', 'tags', `${selectedTag}.json`);
+        const tagData = JSON.parse(fs.readFileSync(tagPath, 'utf-8'));
+
+        // Send a message with the tag data
+        await interaction.channel.send({
+          content: `Tag: ${selectedTag}\nContent: ${tagData.content}`,
+        });
+      }
+    } else if (interaction.isCommand()) {
+      // Handle other command interactions
+      const command = client.commands.get(interaction.commandName);
+
+      if (!command) return;
+
+      // Execute the command
+      await command.execute(interaction);
+    }
   } catch (error) {
-    logger.error(`Error executing command '${interaction.commandName}' for ${interaction.user.tag} in ${interaction.guild.name}: ${error}`);
-    await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+    console.error(`Error handling interaction: ${error}`);
+    await interaction.reply({ content: 'An error occurred while handling the interaction.', ephemeral: true });
   }
 });
 
