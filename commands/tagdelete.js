@@ -15,7 +15,7 @@ module.exports = {
       const member = interaction.guild.members.cache.get(interaction.user.id);
       
       if (!member.roles.cache.has(requiredRoleID)) {
-        return interaction.reply({ content: 'You do not have the required role to use this command.', ephemeral: true });
+        return interaction.reply({ content: 'You are not a staff member! Hence you may not use this command!', ephemeral: true });
       }
 
       // Fetch the list of tag names from the 'tags' directory
@@ -41,7 +41,7 @@ module.exports = {
 
       const actionRow = new ActionRowBuilder().addComponents(selectMenu);
 
-      // Reply to the command executor with the select menu (ephemeral set to true)
+      // Reply to the command executor with the select menu
       await interaction.reply({
         content: 'Choose a tag to delete:',
         components: [actionRow],

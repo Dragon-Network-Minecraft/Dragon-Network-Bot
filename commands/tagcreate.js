@@ -14,7 +14,7 @@ module.exports = {
       // Check if the executor has the required role
       if (!interaction.member.roles.cache.has(STAFF_ROLE_ID)) {
         return await interaction.reply({
-          content: 'You do not have the required role to use this command.',
+          content: 'You are not a staff member! Hence you may not use this command!',
           ephemeral: true,
         });
       }

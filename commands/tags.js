@@ -33,7 +33,7 @@ module.exports = {
 
       const actionRow = new ActionRowBuilder().addComponents(selectMenu);
 
-      // Reply to the command executor with the select menu (ephemeral set to true)
+      // Reply to the command executor with the select menu
       await interaction.reply({
         content: 'Choose a tag:',
         components: [actionRow],
