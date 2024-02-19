@@ -1,4 +1,3 @@
-// interaction-handlers/tags.js
 const { StringSelectMenuBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -6,7 +5,7 @@ const path = require('path');
 module.exports.handleTagSelection = async (interaction) => {
   try {
     // Handle the tag selection
-    const selectedTag = interaction.values[0]; // Assuming it's a single-selection dropdown
+    const selectedTag = interaction.values[0];
 
     // Send ephemeral acknowledgment message
     await interaction.reply({
@@ -18,12 +17,17 @@ module.exports.handleTagSelection = async (interaction) => {
     const tagPath = path.join(__dirname, '..', 'data', 'tags', `${selectedTag}.json`);
     const tagData = JSON.parse(fs.readFileSync(tagPath, 'utf-8'));
 
+    // Get the executor's profile picture (pfp)
+    const executorPfp = interaction.user.displayAvatarURL({ format: 'png', dynamic: true });
+
     // Create an embed with the tag data
     const embed = {
       title: selectedTag,
       description: tagData.content,
+      color: 0xa0202d,
       footer: {
         text: `Executed by ${interaction.user.tag}`,
+        icon_url: executorPfp, 
       },
     };
 
