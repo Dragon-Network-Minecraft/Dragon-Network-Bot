@@ -7,6 +7,7 @@ require('dotenv').config();
 const logger = require('./utilities/logger');
 const tagsHandler = require('./interaction-handlers/tags');
 const tagcreateHandler = require('./interaction-handlers/tagcreate');
+const tagdeleteHandler = require('./interaction-handlers/tagdelete');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -52,7 +53,10 @@ client.on('interactionCreate', async (interaction) => {
   if (!interaction.isCommand() && !interaction.isSelectMenu() && !interaction.isModalSubmit()) return;
 
   try {
-    if (interaction.isSelectMenu()) {
+    if (interaction.isSelectMenu() && interaction.customId === 'tagDeletion') {
+      // Handle tag deletion select menu interactions
+      await tagdeleteHandler.handleTagDeletion(interaction);
+    } else if (interaction.isSelectMenu()) {
       // Handle select menu interactions using the tags handler
       await tagsHandler.handleTagSelection(interaction);
     } else if (interaction.isCommand()) {
