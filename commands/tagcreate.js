@@ -1,62 +1,45 @@
-const fs = require('fs');
-const path = require('path');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const logger = require('../utilities/logger');
+const { ModalBuilder, TextInputBuilder, ActionRowBuilder, TextInputStyle } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('tagcreate')
-    .setDescription('Create a new tag')
-    .addStringOption(option => 
-      option.setName('tagname')
-        .setDescription('Name of the tag')
-        .setRequired(true)
-    )
-    .addStringOption(option => 
-      option.setName('tagcontent')
-        .setDescription('Content of the tag')
-        .setRequired(true)
-    ),
+    .setDescription('Create a new tag'),
 
   async execute(interaction) {
     try {
-      // Check if the user has the specified role
-      const staffRoleId = process.env.STAFF_ROLE_ID;
-      if (!interaction.member.roles.cache.has(staffRoleId)) {
-        return interaction.reply({ content: 'You do not have the required role to use this command!', ephemeral: true });
-      }
+      // Create and show the modal for tag creation
+      const modal = new ModalBuilder()
+        .setCustomId('createTagModal')
+        .setTitle('Create a New Tag');
 
-      // Continue with tag creation logic if the user has the required role
-      const tagName = interaction.options.getString('tagname');
-      const tagContent = interaction.options.getString('tagcontent');
-      const tagPath = path.join(__dirname, '..', 'data', 'tags', `${tagName.toLowerCase()}.json`);
+      // Create the text input components for tag name and content
+      const tagNameInput = new TextInputBuilder()
+        .setCustomId('tagNameInput')
+        .setLabel('Enter Tag Name:')
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
 
-      // Check if the tag already exists
-      if (fs.existsSync(tagPath)) {
-        return interaction.reply({ content: 'Tag with that name already exists!', ephemeral: true });
-      }
+      const tagContentInput = new TextInputBuilder()
+        .setCustomId('tagContentInput')
+        .setLabel('Enter Tag Content:')
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(true);
 
-      // Create the tag file
-      fs.writeFileSync(tagPath, JSON.stringify({ content: tagContent }));
+      // Add inputs to the modal
+      const actionRow = new ActionRowBuilder()
+        .addComponents(tagNameInput);
 
-      logger.log(`Tag created: ${tagName} by ${interaction.user.tag}`);
+      const secondActionRow = new ActionRowBuilder()
+        .addComponents(tagContentInput);
 
-      // Construct a direct object for the reply
-      const replyObject = {
-        content: `Tag created successfully: ${tagName}`,
-        embeds: [{
-          title: 'Tag Details',
-          fields: [
-            { name: 'Tag Name', value: tagName, inline: false },
-            { name: 'Tag Content', value: tagContent, inline: false },
-          ],
-        }],
-      };
+      modal.addComponents(actionRow, secondActionRow);
 
-      await interaction.reply(replyObject);
+      // Show the modal to the user
+      await interaction.showModal(modal);
     } catch (error) {
-      logger.error(`Error creating tag for ${interaction.user.tag}: ${error}`);
-      await interaction.reply({ content: 'There was an error while creating the tag!', ephemeral: true });
+      console.error(`Error executing 'tagcreate' command: ${error}`);
+      await interaction.reply({ content: 'An error occurred while creating the tag.', ephemeral: true });
     }
   },
 };

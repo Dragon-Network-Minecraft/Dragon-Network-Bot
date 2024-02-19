@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ModalBuilder } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
@@ -6,6 +6,7 @@ const path = require('path');
 require('dotenv').config();
 const logger = require('./utilities/logger');
 const tagsHandler = require('./interaction-handlers/tags');
+const tagcreateHandler = require('./interaction-handlers/tagcreate');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -48,7 +49,7 @@ client.on('ready', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand() && !interaction.isSelectMenu()) return;
+  if (!interaction.isCommand() && !interaction.isSelectMenu() && !interaction.isModalSubmit()) return;
 
   try {
     if (interaction.isSelectMenu()) {
@@ -62,6 +63,9 @@ client.on('interactionCreate', async (interaction) => {
 
       // Execute the command
       await command.execute(interaction);
+    } else if (interaction.isModalSubmit() && interaction.customId === 'createTagModal') {
+      // Handle tag creation modal submission
+      await tagcreateHandler.handleTagCreation(interaction);
     }
   } catch (error) {
     console.error(`Error handling interaction: ${error}`);
