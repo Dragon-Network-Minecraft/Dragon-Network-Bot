@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 const logger = require('./utilities/logger');
+const tagsHandler = require('./interaction-handlers/tags');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -51,35 +52,8 @@ client.on('interactionCreate', async (interaction) => {
 
   try {
     if (interaction.isSelectMenu()) {
-      // Handle select menu interactions
-      const customId = interaction.customId;
-
-      if (customId === 'tagSelection') {
-        // Handle the tag selection
-        const selectedTag = interaction.values[0]; // Assuming it's a single-selection dropdown
-
-        // Send ephemeral acknowledgment message
-        await interaction.reply({
-          content: 'Fetching tag information...',
-          ephemeral: true,
-        });
-
-        // Read the content of the selected tag
-        const tagPath = path.join(__dirname, 'data', 'tags', `${selectedTag}.json`);
-        const tagData = JSON.parse(fs.readFileSync(tagPath, 'utf-8'));
-
-        // Create an embed with the tag data
-        const embed = {
-          title: selectedTag,
-          description: tagData.content,
-          footer: {
-            text: `Executed by ${interaction.user.tag}`,
-          },
-        };
-
-        // Send the embed to the channel
-        await interaction.followUp({ embeds: [embed] });
-      }
+      // Handle select menu interactions using the tags handler
+      await tagsHandler.handleTagSelection(interaction);
     } else if (interaction.isCommand()) {
       // Handle other command interactions
       const command = client.commands.get(interaction.commandName);
