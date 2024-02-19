@@ -8,6 +8,7 @@ const logger = require('./utilities/logger');
 const tagsHandler = require('./interaction-handlers/tags');
 const tagcreateHandler = require('./interaction-handlers/tagcreate');
 const tagdeleteHandler = require('./interaction-handlers/tagdelete');
+const ticketPanel = require('./utilities/panel');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -47,6 +48,8 @@ for (const file of commandFiles) {
 
 client.on('ready', () => {
   logger.log(`Logged in as ${client.user.tag}`);
+
+  ticketPanel.sendPanel(client);
 });
 
 client.on('interactionCreate', async (interaction) => {
