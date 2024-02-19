@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utilities/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,7 +17,12 @@ module.exports = {
       const tagNames = tagFiles.map(file => path.parse(file).name);
 
       if (tagNames.length === 0) {
-        return interaction.reply({ content: 'No tags available.', ephemeral: true });
+        await interaction.reply({ content: 'No tags available.', ephemeral: true });
+
+        // Log the warning to the logger
+        logger.warn('No tags available.');
+
+        return;
       }
 
       // Build a select menu with options for each tag
@@ -39,7 +45,13 @@ module.exports = {
         components: [actionRow],
         ephemeral: true,
       });
+
+      // Log the successful execution to the logger
+      logger.log(`'tags' command executed successfully. Available tags: ${tagNames.join(', ')}`);
     } catch (error) {
+      // Log the error to the logger with warning level
+      logger.warn(`Error executing 'tags' command: ${error}`);
+
       console.error(`Error executing 'tags' command: ${error}`);
       await interaction.reply({ content: 'An error occurred while fetching tags.', ephemeral: true });
     }
