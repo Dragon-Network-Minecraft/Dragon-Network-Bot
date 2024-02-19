@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utilities/logger'); 
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,8 +14,10 @@ module.exports = {
       // Check if the command executor has the required role
       const requiredRoleID = process.env.STAFF_ROLE_ID;
       const member = interaction.guild.members.cache.get(interaction.user.id);
-      
+
       if (!member.roles.cache.has(requiredRoleID)) {
+        // Log a warning using the logger
+        logger.warn(`User ${interaction.user.id} tried to execute 'tagdelete' without the required role.`);
         return interaction.reply({ content: 'You are not a staff member! Hence you may not use this command!', ephemeral: true });
       }
 
@@ -24,6 +27,8 @@ module.exports = {
       const tagNames = tagFiles.map(file => path.parse(file).name);
 
       if (tagNames.length === 0) {
+        // Log a warning using the logger
+        logger.warn('No tags available to delete.');
         return interaction.reply({ content: 'No tags available to delete.', ephemeral: true });
       }
 
@@ -41,6 +46,9 @@ module.exports = {
 
       const actionRow = new ActionRowBuilder().addComponents(selectMenu);
 
+      // Log the command execution using the logger
+      logger.warn(`User ${interaction.user.id} executed 'tagdelete' command to delete a tag.`);
+
       // Reply to the command executor with the select menu
       await interaction.reply({
         content: 'Choose a tag to delete:',
@@ -48,7 +56,8 @@ module.exports = {
         ephemeral: true,
       });
     } catch (error) {
-      console.error(`Error executing 'tagdelete' command: ${error}`);
+      // Log an error using the logger
+      logger.error(`Error executing 'tagdelete' command: ${error}`);
       await interaction.reply({ content: 'An error occurred while fetching tags for deletion.', ephemeral: true });
     }
   },
