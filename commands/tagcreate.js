@@ -20,6 +20,13 @@ module.exports = {
 
   async execute(interaction) {
     try {
+      // Check if the user has the specified role
+      const staffRoleId = process.env.STAFF_ROLE_ID;
+      if (!interaction.member.roles.cache.has(staffRoleId)) {
+        return interaction.reply({ content: 'You do not have the required role to use this command!', ephemeral: true });
+      }
+
+      // Continue with tag creation logic if the user has the required role
       const tagName = interaction.options.getString('tagname');
       const tagContent = interaction.options.getString('tagcontent');
       const tagPath = path.join(__dirname, '..', 'data', 'tags', `${tagName.toLowerCase()}.json`);
