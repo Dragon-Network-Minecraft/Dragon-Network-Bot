@@ -1,4 +1,4 @@
-// tickets/panel.js
+const { MessageActionRow, MessageButton } = require('discord.js');
 const logger = require('./logger');
 
 module.exports = {
@@ -20,9 +20,27 @@ module.exports = {
 
     const messageContent = 'Welcome! You can create a ticket by sending a message here.';
 
+    // Create a button using raw JSON
+    const createTicketButton = {
+      type: 1, // Button
+      components: [
+        {
+          type: 2, // Button
+          style: 1, // ButtonStyle.Primary
+          label: 'Create Ticket',
+          custom_id: 'createTicket',
+        },
+      ],
+    };
+
     try {
-      const message = await channel.send(messageContent);
-      logger.log(`Ticket panel message sent in channel ${channel.name} (${channel.id}).`);
+      // Send the welcome message with the button
+      const message = await channel.send({
+        content: messageContent,
+        components: [createTicketButton],
+      });
+
+      logger.log(`Ticket panel message with button sent in channel ${channel.name} (${channel.id}).`);
     } catch (error) {
       logger.error(`Error sending ticket panel message: ${error}`);
     }
