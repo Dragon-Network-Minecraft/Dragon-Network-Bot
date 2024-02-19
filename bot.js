@@ -58,6 +58,12 @@ client.on('interactionCreate', async (interaction) => {
         // Handle the tag selection
         const selectedTag = interaction.values[0]; // Assuming it's a single-selection dropdown
 
+        // Send ephemeral acknowledgment message
+        await interaction.reply({
+          content: 'Fetching tag information...',
+          ephemeral: true,
+        });
+
         // Read the content of the selected tag
         const tagPath = path.join(__dirname, 'data', 'tags', `${selectedTag}.json`);
         const tagData = JSON.parse(fs.readFileSync(tagPath, 'utf-8'));
@@ -72,7 +78,7 @@ client.on('interactionCreate', async (interaction) => {
         };
 
         // Send the embed to the channel
-        await interaction.channel.send({ embeds: [embed] });
+        await interaction.followUp({ embeds: [embed] });
       }
     } else if (interaction.isCommand()) {
       // Handle other command interactions
