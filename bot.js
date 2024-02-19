@@ -62,10 +62,17 @@ client.on('interactionCreate', async (interaction) => {
         const tagPath = path.join(__dirname, 'data', 'tags', `${selectedTag}.json`);
         const tagData = JSON.parse(fs.readFileSync(tagPath, 'utf-8'));
 
-        // Send a message with the tag data
-        await interaction.channel.send({
-          content: `Tag: ${selectedTag}\nContent: ${tagData.content}`,
-        });
+        // Create an embed with the tag data
+        const embed = {
+          title: selectedTag,
+          description: tagData.content,
+          footer: {
+            text: `Executed by ${interaction.user.tag}`,
+          },
+        };
+
+        // Send the embed to the channel
+        await interaction.channel.send({ embeds: [embed] });
       }
     } else if (interaction.isCommand()) {
       // Handle other command interactions
