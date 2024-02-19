@@ -1,6 +1,9 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ModalBuilder, TextInputBuilder, ActionRowBuilder, TextInputStyle } = require('discord.js');
 
+// Assuming you are using dotenv for environment variables
+const { STAFF_ROLE_ID } = process.env;
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('tagcreate')
@@ -8,6 +11,14 @@ module.exports = {
 
   async execute(interaction) {
     try {
+      // Check if the executor has the required role
+      if (!interaction.member.roles.cache.has(STAFF_ROLE_ID)) {
+        return await interaction.reply({
+          content: 'You do not have the required role to use this command.',
+          ephemeral: true,
+        });
+      }
+
       // Create and show the modal for tag creation
       const modal = new ModalBuilder()
         .setCustomId('createTagModal')
