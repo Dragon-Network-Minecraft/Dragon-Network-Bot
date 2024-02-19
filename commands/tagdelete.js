@@ -10,6 +10,14 @@ module.exports = {
 
   async execute(interaction) {
     try {
+      // Check if the command executor has the required role
+      const requiredRoleID = process.env.STAFF_ROLE_ID;
+      const member = interaction.guild.members.cache.get(interaction.user.id);
+      
+      if (!member.roles.cache.has(requiredRoleID)) {
+        return interaction.reply({ content: 'You do not have the required role to use this command.', ephemeral: true });
+      }
+
       // Fetch the list of tag names from the 'tags' directory
       const tagsDirectory = path.join(__dirname, '..', 'data', 'tags');
       const tagFiles = fs.readdirSync(tagsDirectory).filter(file => file.endsWith('.json'));
