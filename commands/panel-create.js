@@ -8,8 +8,15 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      // Send a message in the channel where the command was executed
-      await interaction.reply('Your message content here');
+      // Construct an embed object
+      const embed = {
+        title: 'Panel Message',
+        description: 'Your message content here',
+        color: 0x3498db, // You can customize the color (optional)
+      };
+
+      // Send the embed in the channel where the command was executed
+      await interaction.reply({ embeds: [embed] });
     } catch (error) {
       console.error(`Error in panel-create command: ${error}`);
       await interaction.reply({
