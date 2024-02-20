@@ -51,31 +51,31 @@ client.on('ready', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand() && !interaction.isSelectMenu() && !interaction.isModalSubmit()) return;
-
   try {
-    if (interaction.isSelectMenu() && interaction.customId === 'tagDeletion') {
-      // Handle tag deletion select menu interactions
-      await tagdeleteHandler.handleTagDeletion(interaction);
-    } else if (interaction.isSelectMenu()) {
-      // Handle select menu interactions using the tags handler
-      await tagsHandler.handleTagSelection(interaction);
-    } else if (interaction.isCommand()) {
-      // Handle other command interactions
+    if (interaction.isCommand()) {
+      // Handle command interactions
       const command = client.commands.get(interaction.commandName);
 
       if (!command) return;
 
       // Execute the command
       await command.execute(interaction);
+    } else if (interaction.isSelectMenu() && interaction.customId === 'tagDeletion') {
+      // Handle tag deletion select menu interactions
+      await tagdeleteHandler.handleTagDeletion(interaction);
+    } else if (interaction.isSelectMenu()) {
+      // Handle other select menu interactions using the tags handler
+      await tagsHandler.handleTagSelection(interaction);
     } else if (interaction.isModalSubmit() && interaction.customId === 'createTagModal') {
       // Handle tag creation modal submission
       await tagcreateHandler.handleTagCreation(interaction);
     }
   } catch (error) {
+    // Log and reply with an error message if an exception occurs
     console.error(`Error handling interaction: ${error}`);
     await interaction.reply({ content: 'An error occurred while handling the interaction.', ephemeral: true });
   }
 });
+
 
 client.login(process.env.BOT_TOKEN);
