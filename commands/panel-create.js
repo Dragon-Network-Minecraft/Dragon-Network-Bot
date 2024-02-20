@@ -1,4 +1,3 @@
-// commands/panel-create.js
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
@@ -15,8 +14,21 @@ module.exports = {
         color: 0x3498db, // You can customize the color (optional)
       };
 
-      // Send the embed in the channel where the command was executed
-      await interaction.reply({ embeds: [embed] });
+      // Create a button to initiate the ticket creation
+      const buttonData = {
+        type: 1, // ACTION_ROW
+        components: [
+          {
+            type: 2, // BUTTON
+            style: 1, // PRIMARY
+            label: 'Create Ticket',
+            custom_id: 'createTicketButton',
+          },
+        ],
+      };
+
+      // Send the embed and button in the channel where the command was executed
+      await interaction.reply({ embeds: [embed], components: [buttonData] });
     } catch (error) {
       console.error(`Error in panel-create command: ${error}`);
       await interaction.reply({
