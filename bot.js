@@ -8,6 +8,7 @@ const logger = require('./utilities/logger');
 const tagsHandler = require('./interaction-handlers/tags');
 const tagcreateHandler = require('./interaction-handlers/tagcreate');
 const tagdeleteHandler = require('./interaction-handlers/tagdelete');
+const ticketCreateHandler = require('./interaction-handlers/ticketcreate');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -69,6 +70,9 @@ client.on('interactionCreate', async (interaction) => {
     } else if (interaction.isModalSubmit() && interaction.customId === 'createTagModal') {
       // Handle tag creation modal submission
       await tagcreateHandler.handleTagCreation(interaction);
+    } else if (interaction.isButton() && interaction.customId === 'createTicketButton') {
+      // Handle button click to create a ticket
+      await ticketCreateHandler.handleTicketCreation(interaction);
     }
   } catch (error) {
     // Log and reply with an error message if an exception occurs
