@@ -1,6 +1,6 @@
 // commands/panel-create.js
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { createChannel } = require('../interaction-handlers/channelcreator'); // Import the createChannel function
+const { SlashCommandBuilder } = require('discord.js');
+const logger = require('../utilities/logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,26 +16,21 @@ module.exports = {
         color: 0x3498db, // You can customize the color (optional)
       };
 
-      // Retrieve the username of the user who pressed the button
-      const username = interaction.user.username;
-
-      // Create a button to initiate the channel creation
-      const buttonData = {
+      // Create a button to initiate the ticket creation
+      const button = {
         type: 1, // ACTION_ROW
         components: [
           {
             type: 2, // BUTTON
             style: 1, // PRIMARY
-            label: 'Create Channel',
-            custom_id: 'createChannelButton',
-            // Pass the username to the interaction data
-            custom_id: `createChannelButton:${username}`,
+            label: 'Create Ticket',
+            custom_id: 'createTicketButton',
           },
         ],
       };
 
       // Send the embed and button in the channel where the command was executed
-      await interaction.reply({ embeds: [embed], components: [buttonData] });
+      await interaction.reply({ embeds: [embed], components: [button] });
     } catch (error) {
       console.error(`Error in panel-create command: ${error}`);
       await interaction.reply({
