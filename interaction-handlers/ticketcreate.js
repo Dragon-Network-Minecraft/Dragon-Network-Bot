@@ -51,13 +51,16 @@ async function createChannel(client, interaction) {
       { body: channelOptions },
     );
 
-    // Mention the user in the channel and add them to the channel
+    // Mention the user in the channel and add them to the channel with both view and write permissions
     await interaction.guild.channels.cache
-      .get(createdChannelData.id)
-      .send({ content: `Welcome <@${interaction.user.id}> to your ticket channel!` });
+    .get(createdChannelData.id)
+    .send({ content: `Welcome <@${interaction.user.id}> to your ticket channel!` });
+
     await interaction.guild.channels.cache
-      .get(createdChannelData.id)
-      .permissionOverwrites.create(interaction.user.id, { VIEW_CHANNEL: 0x00000400 }); // 0x00000400 is the numeric value for VIEW_CHANNEL
+    .get(createdChannelData.id)
+    .permissionOverwrites.create(interaction.user.id, {
+      ALLOW: 0x00000400 | 0x00000800, // Numeric values for VIEW_CHANNEL and SEND_MESSAGES
+    });
 
     // Update ticket data in JSON file
     const ticketData = {
