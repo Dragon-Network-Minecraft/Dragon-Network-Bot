@@ -18,19 +18,20 @@ module.exports = {
 
       // Create a button to initiate the ticket creation
       const button = {
+        type: 2, // BUTTON
+        style: 1, // PRIMARY
+        label: 'Create Ticket',
+        custom_id: 'createTicketButton',
+      };
+
+      // Create an action row with the button
+      const actionRow = {
         type: 1, // ACTION_ROW
-        components: [
-          {
-            type: 2, // BUTTON
-            style: 1, // PRIMARY
-            label: 'Create Ticket',
-            custom_id: 'createTicketButton',
-          },
-        ],
+        components: [button],
       };
 
       // Send the embed and button in the channel where the command was executed
-      await interaction.reply({ embeds: [embed], components: [button] });
+      await interaction.reply({ embeds: [embed], components: [actionRow] });
     } catch (error) {
       console.error(`Error in panel-create command: ${error}`);
       await interaction.reply({
