@@ -1,3 +1,4 @@
+// commands/panel-create.js
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { createChannel } = require('../interaction-handlers/channelcreator'); // Import the createChannel function
 
@@ -15,6 +16,9 @@ module.exports = {
         color: 0x3498db, // You can customize the color (optional)
       };
 
+      // Retrieve the username of the user who pressed the button
+      const username = interaction.user.username;
+
       // Create a button to initiate the channel creation
       const buttonData = {
         type: 1, // ACTION_ROW
@@ -24,6 +28,8 @@ module.exports = {
             style: 1, // PRIMARY
             label: 'Create Channel',
             custom_id: 'createChannelButton',
+            // Pass the username to the interaction data
+            custom_id: `createChannelButton:${username}`,
           },
         ],
       };

@@ -1,3 +1,4 @@
+// interaction-handlers/channelcreator.js
 const { REST } = require('discord-api-types/v9');
 const { Routes } = require('discord-api-types/v9');
 const logger = require('../utilities/logger');
@@ -5,9 +6,12 @@ const logger = require('../utilities/logger');
 async function createChannel(interaction) {
   const GUILD_ID = process.env.GUILD_ID;
 
-  // Use the documentation to set up the channel creation parameters
+  // Retrieve the username of the user who pressed the button
+  const username = interaction.user.username;
+
+  // Use the username to dynamically create the channel name
   const channelOptions = {
-    name: 'new-channel', // You can customize this
+    name: `ticket-${username}`, // Dynamically named channel
     type: 0, // Type 0 represents a Text channel, you can change it based on your needs
     // Add other necessary parameters as needed based on your requirements
   };
@@ -20,7 +24,7 @@ async function createChannel(interaction) {
     );
 
     // Send a success message
-    await interaction.reply('Channel created successfully!');
+    await interaction.reply(`Channel ${channelOptions.name} created successfully!`);
   } catch (error) {
     // Handle errors and send an error message
     console.error(`Error creating channel: ${error}`);

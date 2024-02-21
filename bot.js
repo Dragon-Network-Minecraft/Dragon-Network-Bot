@@ -63,8 +63,15 @@ client.on('interactionCreate', async (interaction) => {
       // Execute the command
       await command.execute(interaction, client);
     } else if (interaction.isButton()) {
-      // Handle button interactions using the createchannel handler
-      await createchannelHandler.handleCreateChannelButton(interaction);
+      // Handle button interactions
+      const [customId, username] = interaction.customId.split(':');
+
+      if (customId === 'createChannelButton') {
+        // Handle button interactions using the createchannel handler
+        await createchannelHandler.handleCreateChannelButton(interaction, username);
+      } else {
+        // Handle other button interactions as needed
+      }
     } else if (interaction.isSelectMenu() && interaction.customId === 'tagDeletion') {
       // Handle tag deletion select menu interactions
       await tagdeleteHandler.handleTagDeletion(interaction);
@@ -81,7 +88,5 @@ client.on('interactionCreate', async (interaction) => {
     await interaction.reply({ content: 'An error occurred while handling the interaction.', ephemeral: true });
   }
 });
-
-
 
 client.login(process.env.BOT_TOKEN);
