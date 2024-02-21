@@ -17,9 +17,20 @@ async function createChannel(client, interaction) {
 
     // Read existing ticket list or create an empty array
     const userTicketListPath = path.join(userTicketDir, 'list.json');
-    const existingTicketList = await fs.readFile(userTicketListPath, 'utf-8')
-      .then(data => JSON.parse(data))
-      .catch(() => []);
+    let existingTicketList = [];
+
+    try {
+      const data = await fs.readFile(userTicketListPath, 'utf-8');
+      existingTicketList = JSON.parse(data);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        // If the file does not exist, create the user directory
+        await fs.mkdir(userTicketDir, { recursive: true });
+      } else {
+        console.error(`Error reading existing ticket list: ${error}`);
+        // Handle other errors if needed
+      }
+    }
 
     // Check if the user has already created a ticket channel
     if (existingTicketList.some(ticket => ticket.status === 'open')) {
