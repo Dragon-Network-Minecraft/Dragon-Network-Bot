@@ -7,6 +7,9 @@ const path = require('path');
 require('dotenv').config();
 const logger = require('./utilities/logger');
 const { handleTicketCreation } = require('./interaction-handlers/ticketcreate');
+const tagsHandler = require('./interaction-handlers/tags');
+const tagcreateHandler = require('./interaction-handlers/tagcreate');
+const tagdeleteHandler = require('./interaction-handlers/tagdelete');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -50,15 +53,17 @@ client.on('ready', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand() && !interaction.isSelectMenu() && !interaction.isModalSubmit() && !interaction.isButton()) return;
+
   try {
     if (interaction.isCommand()) {
       // Handle command interactions
       const command = client.commands.get(interaction.commandName);
 
-      if (!command) return;
-
-      // Execute the command
-      await command.execute(interaction, client);
+      if (command) {
+        // Execute the command
+        await command.execute(interaction, client);
+      }
     } else if (interaction.isButton()) {
       // Handle button interactions
       if (interaction.customId === 'createTicketButton') {
@@ -67,8 +72,17 @@ client.on('interactionCreate', async (interaction) => {
       } else {
         // Handle other button interactions as needed
       }
-    } else {
-      // Handle other interaction types as needed
+    } else if (interaction.isSelectMenu()) {
+      if (interaction.customId === 'tagDeletion') {
+        // Handle tag deletion select menu interactions
+        await tagdeleteHandler.handleTagDeletion(interaction);
+      } else {
+        // Handle other select menu interactions using the tags handler
+        await tagsHandler.handleTagSelection(interaction);
+      }
+    } else if (interaction.isModalSubmit() && interaction.customId === 'createTagModal') {
+      // Handle tag creation modal submission
+      await tagcreateHandler.handleTagCreation(interaction);
     }
   } catch (error) {
     // Log and reply with an error message if an exception occurs
@@ -76,5 +90,6 @@ client.on('interactionCreate', async (interaction) => {
     await interaction.reply({ content: 'An error occurred while handling the interaction.', ephemeral: true });
   }
 });
+
 
 client.login(process.env.BOT_TOKEN);
