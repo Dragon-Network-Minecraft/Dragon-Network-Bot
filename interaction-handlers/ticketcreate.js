@@ -61,19 +61,9 @@ async function createChannel(client, interaction) {
       { body: channelOptions },
     );
 
-    // Mention the user in the channel and add them to the channel with both view and write permissions
+    // Mention the user in the channel
     const ticketChannel = interaction.guild.channels.cache.get(createdChannelData.id);
     await ticketChannel.send(`Welcome <@${interaction.user.id}> to your ticket channel!`);
-
-    await ticketChannel.permissionOverwrites.create(interaction.user.id, {
-      allow: [
-        {
-          id: interaction.user.id,
-          type: 'USER',
-          allow: ['VIEW_CHANNEL'],
-        },
-      ],
-    });
 
     // Update ticket data in JSON file
     const ticketData = {
