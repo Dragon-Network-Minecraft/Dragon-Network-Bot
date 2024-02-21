@@ -1,5 +1,5 @@
-// interaction-handlers/ticketcreate.js
 const logger = require('../utilities/logger');
+const { createChannel } = require('../bot'); // Import the createChannel function
 
 async function handleTicketCreation(interaction) {
   try {
@@ -16,11 +16,8 @@ async function handleTicketCreation(interaction) {
 
     // Check if the interaction is in a guild
     if (interaction.guild) {
-      // Send a reply in the guild
-      await interaction.reply({
-        content: 'Ticket creation action initiated. Check your direct messages for details.',
-        ephemeral: true,
-      });
+      // Use the createChannel function to create the channel
+      await createChannel(interaction);
     }
 
     // Send a direct message to the user

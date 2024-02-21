@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { createChannel } = require('../bot'); // Import the createChannel function
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,15 +15,15 @@ module.exports = {
         color: 0x3498db, // You can customize the color (optional)
       };
 
-      // Create a button to initiate the ticket creation
+      // Create a button to initiate the channel creation
       const buttonData = {
         type: 1, // ACTION_ROW
         components: [
           {
             type: 2, // BUTTON
             style: 1, // PRIMARY
-            label: 'Create Ticket',
-            custom_id: 'createTicketButton',
+            label: 'Create Channel',
+            custom_id: 'createChannelButton',
           },
         ],
       };
