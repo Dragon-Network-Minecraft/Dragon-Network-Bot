@@ -1,6 +1,6 @@
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { MessageActionRow, MessageButton, Permissions } = require('discord.js');
 const fs = require('fs').promises;
 const path = require('path');
 const logger = require('../utilities/logger');
@@ -63,15 +63,19 @@ async function createChannel(client, interaction) {
     );
 
     // Mention the user in the channel and add them to the channel with both view and write permissions
-    await interaction.guild.channels.cache
-    .get(createdChannelData.id)
-    .send({ content: `Welcome <@${interaction.user.id}> to your ticket channel!` });
+    const ticketChannel = interaction.guild.channels.cache.get(createdChannelData.id);
+    await ticketChannel.send(`Welcome <@${interaction.user.id}> to your ticket channel!`);
 
-    await interaction.guild.channels.cache
-    .get(createdChannelData.id)
-    .permissionOverwrites.create(interaction.user.id, {
-      ALLOW: 0x00000400
+    await ticketChannel.permissionOverwrites.create(interaction.user.id, {
+      allow: [
+        {
+          id: interaction.user.id,
+          type: 'USER',
+          allow: ['VIEW_CHANNEL'],
+        },
+      ],
     });
+    
 
     // Update ticket data in JSON file
     const ticketData = {
