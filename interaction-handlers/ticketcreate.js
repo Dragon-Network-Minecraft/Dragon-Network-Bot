@@ -28,7 +28,6 @@ async function createChannel(client, interaction) {
         await fs.mkdir(userTicketDir, { recursive: true });
       } else {
         console.error(`Error reading existing ticket list: ${error}`);
-        console.error(`Error reading existing ticket list: ${error.message}`);
         // Handle other errors if needed
       }
     }
@@ -66,10 +65,6 @@ async function createChannel(client, interaction) {
     const ticketChannel = interaction.guild.channels.cache.get(createdChannelData.id);
     await ticketChannel.send(`Welcome <@${interaction.user.id}> to your ticket channel!`);
 
-    // Log the channel creation and mention
-    console.log(`Ticket channel created: ${createdChannelData.name} (${createdChannelData.id})`);
-    console.log(`User mentioned in the channel: ${interaction.user.username}#${interaction.user.discriminator}`);
-
     // Update ticket data in JSON file
     const ticketData = {
       timestamp,
@@ -89,30 +84,11 @@ async function createChannel(client, interaction) {
     // Write the updated ticket list back to the file
     await fs.writeFile(userTicketListPath, JSON.stringify(existingTicketList, null, 2));
 
-    // Wait for 3 seconds and then grant user view permissions
-    setTimeout(async () => {
-      try {
-        const member = await interaction.guild.members.fetch(interaction.user.id);
-        const permissions = ['VIEW_CHANNEL'];
-
-        await ticketChannel.permissionOverwrites.edit(member, {
-          permissions: permissions,
-        });
-
-        // Log permission update
-        console.log(`User permissions updated in ${ticketChannel.name}: ${interaction.user.username}#${interaction.user.discriminator}`);
-      } catch (permissionsError) {
-        console.error(`Error updating user permissions: ${permissionsError}`);
-        console.error(`Error updating user permissions: ${permissionsError.message}`);
-      }
-    }, 3000);
-
     // Send a success message with ephemeral set to true
     await interaction.reply({ content: `Channel ${createdChannelData.name} created successfully!`, ephemeral: true });
   } catch (error) {
     // Handle errors and send an error message with ephemeral set to true
     console.error(`Error creating channel: ${error}`);
-    console.error(`Error creating channel: ${error.message}`);
     await interaction.reply({ content: 'An error occurred while creating the channel.', ephemeral: true });
   }
 }
