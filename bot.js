@@ -1,14 +1,11 @@
-const { Client, GatewayIntentBits, ModalBuilder } = require('discord.js');
+// bot.js
+const { Client, GatewayIntentBits } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 const logger = require('./utilities/logger');
-const tagsHandler = require('./interaction-handlers/tags');
-const tagcreateHandler = require('./interaction-handlers/tagcreate');
-const tagdeleteHandler = require('./interaction-handlers/tagdelete');
-const ticketCreateHandler = require('./interaction-handlers/ticketcreate');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -17,16 +14,17 @@ const client = new Client({
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
-for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
-  commands.push(command.data.toJSON());
-}
-
 const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
 
+// Register commands on bot startup
 (async () => {
   try {
     logger.log('Started refreshing global (/) commands.');
+
+    for (const file of commandFiles) {
+      const command = require(`./commands/${file}`);
+      commands.push(command.data.toJSON());
+    }
 
     await rest.put(
       Routes.applicationCommands(process.env.CLIENT_ID),
@@ -39,8 +37,8 @@ const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
   }
 })();
 
+// Set up the command map
 client.commands = new Map();
-
 for (const file of commandFiles) {
   const command = require(`./commands/${file}`);
   client.commands.set(command.data.name, command);
@@ -48,7 +46,6 @@ for (const file of commandFiles) {
 
 client.on('ready', () => {
   logger.log(`Logged in as ${client.user.tag}`);
-
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -60,19 +57,13 @@ client.on('interactionCreate', async (interaction) => {
       if (!command) return;
 
       // Execute the command
-      await command.execute(interaction);
-    } else if (interaction.isSelectMenu() && interaction.customId === 'tagDeletion') {
-      // Handle tag deletion select menu interactions
-      await tagdeleteHandler.handleTagDeletion(interaction);
-    } else if (interaction.isSelectMenu()) {
-      // Handle other select menu interactions using the tags handler
-      await tagsHandler.handleTagSelection(interaction);
-    } else if (interaction.isModalSubmit() && interaction.customId === 'createTagModal') {
-      // Handle tag creation modal submission
-      await tagcreateHandler.handleTagCreation(interaction);
-    } else if (interaction.isButton() && interaction.customId === 'createTicketButton') {
-      // Handle button click to create a ticket
-      await ticketCreateHandler.handleTicketCreation(interaction);
+      await command.execute(interaction, client);
+    } else if (interaction.isButton()) {
+      // Handle button interactions
+      if (interaction.customId === 'createChannelButton') {
+        // Call the function to create the channel
+        await createChannel(interaction, client);
+      }
     }
   } catch (error) {
     // Log and reply with an error message if an exception occurs
@@ -81,5 +72,30 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
+async function createChannel(interaction, client) {
+  const GUILD_ID = process.env.GUILD_ID;
+
+  // Use the documentation to set up the channel creation parameters
+  const channelOptions = {
+    name: 'new-channel', // You can customize this
+    type: 0, // Type 0 represents a Text channel, you can change it based on your needs
+    // Add other necessary parameters as needed based on your requirements
+  };
+
+  try {
+    // Make the API request to create the channel
+    await rest.post(
+      Routes.guildChannels(GUILD_ID),
+      { body: channelOptions },
+    );
+
+    // Send a success message
+    await interaction.reply('Channel created successfully!');
+  } catch (error) {
+    // Handle errors and send an error message
+    console.error(`Error creating channel: ${error}`);
+    await interaction.reply('An error occurred while creating the channel.');
+  }
+}
 
 client.login(process.env.BOT_TOKEN);
