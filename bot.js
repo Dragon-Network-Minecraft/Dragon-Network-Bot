@@ -63,7 +63,7 @@ client.on('interactionCreate', async (interaction) => {
       // Handle button interactions
       if (interaction.customId === 'createTicketButton') {
         // Handle ticket creation button interactions using the ticketcreate handler
-        await handleTicketCreation(interaction);
+        await handleTicketCreation(client, interaction);
       } else {
         // Handle other button interactions as needed
       }

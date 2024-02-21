@@ -2,27 +2,45 @@
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { MessageActionRow, MessageButton } = require('discord.js');
+const fs = require('fs').promises;
+const path = require('path');
 const logger = require('../utilities/logger');
 
 const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
 
 const createdTicketChannels = new Set();
 
-async function createChannel(interaction, username, categoryId) {
+async function createChannel(client, interaction, categoryId) {
   const GUILD_ID = process.env.GUILD_ID;
 
   try {
+    const userId = interaction.user.id;
+    const userTicketDir = path.join('data/tickets', userId);
+
     // Check if the user has already created a ticket channel
-    if (createdTicketChannels.has(interaction.user.id)) {
-      await interaction.reply({ content: 'You have already created a ticket channel.', ephemeral: true });
+    if (createdTicketChannels.has(userId)) {
+      await interaction.reply({ content: 'You already have an open ticket.', ephemeral: true });
       return;
     }
 
-    // Use the username to dynamically create the channel name
+    // Check if the user has a ticket directory, create one if not
+    await fs.mkdir(userTicketDir, { recursive: true });
+
+    // Construct the channel creation timestamp
+    const timestamp = new Date().toISOString();
+
+    // Fetch the username from the interaction object
+    const fetchedUser = await client.users.fetch(interaction.user.id);
+    const fetchedUsername = fetchedUser.username;
+
+    // Use the fetched username to dynamically create the channel name
+    const channelName = `ticket-${fetchedUsername}`;
+
+    // Create the channel options
     const channelOptions = {
-      name: `ticket-${username}`, // Dynamically named channel
-      type: 0, // Type 0 represents a Text channel, you can change it based on your needs
-      parent_id: categoryId, // Specify the category ID for ticket channels
+      name: channelName,
+      type: 0,
+      parent_id: categoryId,
       // Add other necessary parameters as needed based on your requirements
     };
 
@@ -33,7 +51,33 @@ async function createChannel(interaction, username, categoryId) {
     );
 
     // Add user ID to the set to mark that they've created a ticket channel
-    createdTicketChannels.add(interaction.user.id);
+    createdTicketChannels.add(userId);
+
+    // Update ticket data in JSON file
+    const ticketData = {
+      timestamp,
+      channelName,
+      channelId: createdChannel.id,
+      userDetails: {
+        username: fetchedUsername,
+        discriminator: interaction.user.discriminator,
+        userId,
+      },
+      status: 'open',
+    };
+
+    const userTicketListPath = path.join(userTicketDir, 'list.json');
+
+    // Read existing ticket list or create an empty array
+    const existingTicketList = await fs.readFile(userTicketListPath, 'utf-8')
+      .then(data => JSON.parse(data))
+      .catch(() => []);
+
+    // Add the new ticket data to the list
+    existingTicketList.push(ticketData);
+
+    // Write the updated ticket list back to the file
+    await fs.writeFile(userTicketListPath, JSON.stringify(existingTicketList, null, 2));
 
     // Send a success message with ephemeral set to true
     await interaction.reply({ content: `Channel ${createdChannel.name} created successfully!`, ephemeral: true });
@@ -44,37 +88,6 @@ async function createChannel(interaction, username, categoryId) {
   }
 }
 
-async function handleTicketCreation(interaction) {
-  try {
-    const userId = interaction.user.id;
-
-    // Check if the user ID is available
-    if (!userId) {
-      logger.error('User ID is missing.');
-      throw new Error('User ID is missing.');
-    }
-
-    // Check if the interaction is in a guild
-    if (interaction.guild) {
-      // Retrieve the username of the user who pressed the button
-      const username = interaction.user.username;
-
-      // Specify the category ID for ticket channels from .env
-      const categoryId = process.env.TICKET_CATEGORY_ID;
-
-      // Use the createChannel function to create the channel
-      await createChannel(interaction, username, categoryId);
-    }
-    
-  } catch (error) {
-    logger.error(`Error handling ticket creation: ${error.message}`);
-    // Check if the interaction is still valid before replying
-    if (interaction.replied) return;
-    // Send an error message with ephemeral set to true
-    await interaction.reply({ content: 'An error occurred while handling the interaction.', ephemeral: true });
-  }
-}
-
 module.exports = {
-  handleTicketCreation,
+  handleTicketCreation: createChannel,
 };
