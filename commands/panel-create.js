@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { createChannel } = require('../bot'); // Import the createChannel function
+const { createChannel } = require('../interaction-handlers/channelcreator'); // Import the createChannel function
 
 module.exports = {
   data: new SlashCommandBuilder()

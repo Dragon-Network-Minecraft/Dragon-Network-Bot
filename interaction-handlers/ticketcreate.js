@@ -1,5 +1,5 @@
 const logger = require('../utilities/logger');
-const { createChannel } = require('../bot'); // Import the createChannel function
+const { createChannel } = require('./channelcreator'); // Import the createChannel function
 
 async function handleTicketCreation(interaction) {
   try {
