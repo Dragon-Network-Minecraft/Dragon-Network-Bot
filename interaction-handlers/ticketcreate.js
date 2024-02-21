@@ -7,8 +7,9 @@ const logger = require('../utilities/logger');
 
 const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
 
-async function createChannel(client, interaction, categoryId) {
+async function createChannel(client, interaction) {
   const GUILD_ID = process.env.GUILD_ID;
+  const TICKET_CATEGORY_ID = process.env.TICKET_CATEGORY_ID;
 
   try {
     const userId = interaction.user.id;
@@ -40,7 +41,7 @@ async function createChannel(client, interaction, categoryId) {
     const channelOptions = {
       name: channelName,
       type: 0,
-      parent_id: categoryId,
+      parent_id: TICKET_CATEGORY_ID, // Specify the category ID here
       // Add other necessary parameters as needed based on your requirements
     };
 
