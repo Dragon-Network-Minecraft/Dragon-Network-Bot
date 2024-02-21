@@ -1,11 +1,15 @@
 // bot.js
 const { Client, GatewayIntentBits } = require('discord.js');
-const { REST } = require('@discordjs/rest');
+const { REST } = require('@discordjs/rest'); // Corrected import
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 const logger = require('./utilities/logger');
+const tagsHandler = require('./interaction-handlers/tags');
+const tagcreateHandler = require('./interaction-handlers/tagcreate');
+const tagdeleteHandler = require('./interaction-handlers/tagdelete');
+const createchannelHandler = require('./interaction-handlers/createchannel');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -59,11 +63,17 @@ client.on('interactionCreate', async (interaction) => {
       // Execute the command
       await command.execute(interaction, client);
     } else if (interaction.isButton()) {
-      // Handle button interactions
-      if (interaction.customId === 'createChannelButton') {
-        // Call the function to create the channel
-        await createChannel(interaction, client);
-      }
+      // Handle button interactions using the createchannel handler
+      await createchannelHandler.handleCreateChannelButton(interaction);
+    } else if (interaction.isSelectMenu() && interaction.customId === 'tagDeletion') {
+      // Handle tag deletion select menu interactions
+      await tagdeleteHandler.handleTagDeletion(interaction);
+    } else if (interaction.isSelectMenu()) {
+      // Handle other select menu interactions using the tags handler
+      await tagsHandler.handleTagSelection(interaction);
+    } else if (interaction.isModalSubmit() && interaction.customId === 'createTagModal') {
+      // Handle tag creation modal submission
+      await tagcreateHandler.handleTagCreation(interaction);
     }
   } catch (error) {
     // Log and reply with an error message if an exception occurs
