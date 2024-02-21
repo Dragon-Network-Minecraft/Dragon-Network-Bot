@@ -1,4 +1,3 @@
-// interaction-handlers/ticketcreate.js
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { MessageActionRow, MessageButton } = require('discord.js');
@@ -8,8 +7,6 @@ const logger = require('../utilities/logger');
 
 const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
 
-const createdTicketChannels = new Set();
-
 async function createChannel(client, interaction, categoryId) {
   const GUILD_ID = process.env.GUILD_ID;
 
@@ -17,14 +14,17 @@ async function createChannel(client, interaction, categoryId) {
     const userId = interaction.user.id;
     const userTicketDir = path.join('data/tickets', userId);
 
+    // Read existing ticket list or create an empty array
+    const userTicketListPath = path.join(userTicketDir, 'list.json');
+    const existingTicketList = await fs.readFile(userTicketListPath, 'utf-8')
+      .then(data => JSON.parse(data))
+      .catch(() => []);
+
     // Check if the user has already created a ticket channel
-    if (createdTicketChannels.has(userId)) {
+    if (existingTicketList.some(ticket => ticket.status === 'open')) {
       await interaction.reply({ content: 'You already have an open ticket.', ephemeral: true });
       return;
     }
-
-    // Check if the user has a ticket directory, create one if not
-    await fs.mkdir(userTicketDir, { recursive: true });
 
     // Construct the channel creation timestamp
     const timestamp = new Date().toISOString();
@@ -50,9 +50,6 @@ async function createChannel(client, interaction, categoryId) {
       { body: channelOptions },
     );
 
-    // Add user ID to the set to mark that they've created a ticket channel
-    createdTicketChannels.add(userId);
-
     // Update ticket data in JSON file
     const ticketData = {
       timestamp,
@@ -65,13 +62,6 @@ async function createChannel(client, interaction, categoryId) {
       },
       status: 'open',
     };
-
-    const userTicketListPath = path.join(userTicketDir, 'list.json');
-
-    // Read existing ticket list or create an empty array
-    const existingTicketList = await fs.readFile(userTicketListPath, 'utf-8')
-      .then(data => JSON.parse(data))
-      .catch(() => []);
 
     // Add the new ticket data to the list
     existingTicketList.push(ticketData);
