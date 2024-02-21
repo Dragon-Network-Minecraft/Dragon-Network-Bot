@@ -52,8 +52,7 @@ async function createChannel(client, interaction) {
     const channelOptions = {
       name: channelName,
       type: 0,
-      parent_id: TICKET_CATEGORY_ID, // Specify the category ID here
-      // Add other necessary parameters as needed based on your requirements
+      parent_id: TICKET_CATEGORY_ID,
     };
 
     // Make the API request to create the channel
@@ -75,7 +74,6 @@ async function createChannel(client, interaction) {
         },
       ],
     });
-    
 
     // Update ticket data in JSON file
     const ticketData = {
