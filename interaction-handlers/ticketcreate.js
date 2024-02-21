@@ -46,16 +46,24 @@ async function createChannel(client, interaction) {
     };
 
     // Make the API request to create the channel
-    const createdChannel = await rest.post(
+    const createdChannelData = await rest.post(
       Routes.guildChannels(GUILD_ID),
       { body: channelOptions },
     );
+
+    // Mention the user in the channel and add them to the channel
+    await interaction.guild.channels.cache
+      .get(createdChannelData.id)
+      .send({ content: `Welcome <@${interaction.user.id}> to your ticket channel!` });
+    await interaction.guild.channels.cache
+      .get(createdChannelData.id)
+      .permissionOverwrites.create(interaction.user.id, { VIEW_CHANNEL: 0x00000400 }); // 0x00000400 is the numeric value for VIEW_CHANNEL
 
     // Update ticket data in JSON file
     const ticketData = {
       timestamp,
       channelName,
-      channelId: createdChannel.id,
+      channelId: createdChannelData.id,
       userDetails: {
         username: fetchedUsername,
         discriminator: interaction.user.discriminator,
@@ -71,7 +79,7 @@ async function createChannel(client, interaction) {
     await fs.writeFile(userTicketListPath, JSON.stringify(existingTicketList, null, 2));
 
     // Send a success message with ephemeral set to true
-    await interaction.reply({ content: `Channel ${createdChannel.name} created successfully!`, ephemeral: true });
+    await interaction.reply({ content: `Channel ${createdChannelData.name} created successfully!`, ephemeral: true });
   } catch (error) {
     // Handle errors and send an error message with ephemeral set to true
     console.error(`Error creating channel: ${error}`);
