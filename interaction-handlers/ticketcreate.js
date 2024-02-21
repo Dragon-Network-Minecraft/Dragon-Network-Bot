@@ -70,7 +70,7 @@ async function createChannel(client, interaction) {
     await interaction.guild.channels.cache
     .get(createdChannelData.id)
     .permissionOverwrites.create(interaction.user.id, {
-      ALLOW: 0x00000400 | 0x00000800, // Numeric values for VIEW_CHANNEL and SEND_MESSAGES
+      ALLOW: 0x00000400
     });
 
     // Update ticket data in JSON file
